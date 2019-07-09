@@ -1,0 +1,4 @@
+<aura:event access="global" type="APPLICATION" description="Record Hunter's Search Result Event" >
+    <aura:attribute access="global" type="String[]" name="recordIds" />
+    <aura:attribute access="global" type="String" name="origin" />
+</aura:event>

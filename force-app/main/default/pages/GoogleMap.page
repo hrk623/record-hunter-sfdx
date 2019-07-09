@@ -1,0 +1,218 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" lightningStylesheets="true">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+        <meta name="viewport" content="initial-scale=1.0" />
+        <meta charset="utf-8" />
+ 
+        <div id="map"></div>   
+        
+        <script>
+        let port;
+        
+        // The map and its properties
+        let map;
+        let center = {lat: 35.679908, lng:139.7632473};
+        let zoom = 14;
+        let infoWindow
+        const markers = {};
+        const circles = {};
+
+        (function () {
+            window.addEventListener('message', function(event) {
+                port = event.ports[0];
+                port.onmessage = function (e) {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'INIT') {
+                        onInit(data);
+                    } else if (data.type === 'UPDATE') {
+                        onUpdate(data);
+                    }  else if (data.type === 'GEOCODE') {
+                        onGeocode(data);
+                    }
+                };
+                port.postMessage(JSON.stringify({
+                    type: 'PORT',
+                }));
+            }, false);
+        })(); 
+        function onInit(data) {
+            center = data.center;
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=' + data.apikey + '&callback=onScriptLoaded' ;
+            document.body.appendChild(script);
+        }
+        function onScriptLoaded() {
+            // Initialize the map
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: center,
+                zoom: zoom,
+                disableDefaultUI: true,
+                clickableIcons : false,
+            });
+           
+            port.postMessage(JSON.stringify({
+                type: 'GOOGLEMAP',
+            }));
+        }
+        function onUpdate(data) {
+            if (data.center) {
+               map.setCenter(data.center);
+            }
+
+            if (data.markers) {
+                // Delete existing markers.
+                Object.keys(markers).forEach(function(key) {
+                    if (markers[key]) {
+                        markers[key].setMap(null);
+                        markers[key] = null;
+                    }
+                });
+                // Create brand new markers
+                data.markers.forEach(function(property) {
+                    if (property.position.lat && property.position.lng) markers[property.id] = createMarker(property);
+                });
+            }
+            
+            if (data.circles) {
+                // Delete existing circles.
+                Object.keys(circles).forEach(function(key) {
+                    if (circles[key]) {
+                        circles[key].setMap(null);
+                        circles[key] = null;
+                    }
+                });
+                // Create brand new circle
+                data.circles.forEach(function(property) {
+                    if (property.center.lat && property.center.lng && property.radius) circles[property.id] = createCircle(property);
+                });
+            }
+            
+            // Set the map boudary to show all markers and circles.
+            let bounds = new google.maps.LatLngBounds();
+            Object.values(markers).forEach(function(marker) {
+                if (marker) bounds.extend(marker.getPosition());
+            });
+            if (!bounds.isEmpty()) map.fitBounds(bounds);
+            
+            bounds = new google.maps.LatLngBounds();
+            Object.values(circles).forEach(function(circle) {
+                if (circle) bounds.union(circle.getBounds());
+            });
+            if (!bounds.isEmpty()) map.fitBounds(bounds);
+        }
+        function onGeocode(data) {
+            getPositionFromAddress(data.location)
+            .then(function(position) {
+                port.postMessage(JSON.stringify({
+                    type: 'GEOCODE_RESULT',
+                    latlng: {
+                        lat: position.lat(), 
+                        lng: position.lng()
+                    }
+                }));
+            })
+            .catch(function(reason) {
+                console.log(reason);
+            });
+        }
+        function createMarker(property) {
+            const marker = new google.maps.Marker(property);
+            marker.setMap(map);
+            
+            if (property.content && property.content.title) {
+                marker.addListener('click', function() {
+                    if (infoWindow) infoWindow.close();
+                    
+                    let content = '';
+                    content +='<section class="content">';
+                    if (property.content.imageUrl) content +=  '<div class="avatar slds-avatar" style="background-image: url(\''+property.content.imageUrl+'\');"></div>';
+                    content +=  '<div class="information">';
+                    content +=    '<a href="javascript:void(0)" onclick="navigateToRecord(\'' +property.id+ '\')"><div class="slds-text-heading_small slds-truncate title" >' +property.content.title+ '</div></a>';
+                    if (property.content.description) content +=    '<div class="slds-text-body_regular description">' +property.content.description+ '</div>';
+                    content +=  '</div>';
+                    content += '</section>';
+                    
+                    infoWindow = new google.maps.InfoWindow({
+                        content: content,
+                    });
+                    infoWindow.addListener('closeclick', function() {
+                        infoWindow = null;
+                    }) ;
+                    infoWindow.open(map, marker);
+                });
+            }
+            return marker;
+        }
+        function createCircle(property) {
+            const circle = new google.maps.Circle(property);
+            circle.setMap(map);
+            return circle;
+        }
+        function navigateToRecord(id) {
+            port.postMessage(JSON.stringify({
+                type: 'NAVIGATE',
+                id: id
+            }));
+        }
+        function getPositionFromAddress(address) {
+            return new Promise(function(resolve, reject) {
+                console.log('getPositionFromAddress', address);
+                new google.maps.Geocoder().geocode({'address': address}, function(results, status) {
+                    if (status === 'OK') resolve(results[0].geometry.location);
+                    else reject('Geocode was not successful for the following reason: ' + status);
+                });
+            });
+        }
+        function getAddressFromPosition(position) {
+            return new Promise(function(resolve, reject) {
+                console.log('getAddressFromPosition', position);
+                new google.maps.Geocoder().geocode({'location': position}, function(results, status) {
+                    if (status === 'OK') {
+                        if (results[0]) resolve(results[0].formatted_address);
+                        else resolve('No Results Found');
+                    } else {
+                        reject('Geocoder failed due to: ' + status);
+                    }
+                });
+            });
+        }
+        </script>
+        
+        <style>
+            #map {
+            height: 100%;
+            }
+            html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            }
+            
+            section.content {
+            display: flex;
+            } 
+            section.content .avatar {
+            min-height: 64px;
+            min-width: 64px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-right: 8px;
+            }
+            section.content .information {
+            display: flex;
+            flex-direction: column;
+            width: 180px;
+            flex: 1;
+            }
+            section.content .information .title {
+            margin-bottom: 2px;
+            }
+            section.content .information .description {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            }
+        </style>
+        
+    </html>
+    
+</apex:page>

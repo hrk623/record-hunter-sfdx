@@ -1,0 +1,159 @@
+<aura:component access="global" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes"  controller="SearchBoxController" >
+
+    <!-- External Libraries -->
+    <ltng:require scripts="{!$Resource.RecordHunterLib + '/asset/js/moment.js'}" afterScriptsLoaded="{!c.onAfterScriptsLoaded}" />
+
+    <!-- Global Attributes -->
+    <aura:attribute access="global" type="String"  name="title"                     />
+    <aura:attribute access="global" type="String"  name="objectName"                />
+    <aura:attribute access="global" type="String"  name="searchButtonLabel"         />
+    <aura:attribute access="global" type="String"  name="fieldNames"                default="" />
+    <aura:attribute access="global" type="String"  name="numColums"                 />
+    <aura:attribute access="global" type="Boolean" name="isObjectNameDisplayed"     />
+    <aura:attribute access="global" type="Boolean" name="isFieldIndexDisplayed"     />
+    <aura:attribute access="global" type="Boolean" name="isConditionFolded"         />
+    <aura:attribute access="global" type="String"  name="customLogic"               default=""/>
+    <aura:attribute access="global" type="String"  name="sectionHeaders"            default=""/>
+    <aura:attribute access="global" type="String"  name="fieldNamesOrDefaultValues" default=""/>
+    <aura:attribute access="global" type="String"  name="recordId"                  />
+    <aura:attribute access="global" type="String" name="order"  />
+
+    <!-- Public Attributes -->
+    <aura:attribute access="public" type="Boolean" name="isCheckboxIgnoredIfUnchecked" default="true" />
+    <aura:attribute access="public" type="String"  name="errorMessage"       default=""/>
+
+    <!-- Private Attributes -->
+    <aura:attribute access="private" type="String"   name="iconName"           default="standard:search" />
+    <aura:attribute access="private" type="String"   name="keyword"            default=""/>
+    <aura:attribute access="private" type="Object[]" name="fields"             default="[]" />
+    <aura:attribute access="private" type="Boolean"  name="isKeywordEnabled"   />
+    <aura:attribute access="private" type="Boolean"  name="isConditionEnabled" />
+    <aura:attribute access="private" type="Integer"  name="numGroupItems"      default="6"/>
+    <aura:attribute access="private" type="Object[]" name="groups"             default="[]" />
+
+    <!-- Event Handlers -->
+
+    <!-- Event Register -->
+    <aura:registerEvent name="appEvent" type="c:SearchResult"/>
+
+    <!-- User Interface -->
+    <div aura:id="component">
+        <lightning:card iconName="{!v.iconName}" title="{!v.title}">
+
+            <aura:if isTrue="{!!empty(v.errorMessage)}">
+                <ui:message title="Error" severity="error" closable="false">{!v.errorMessage}</ui:message>
+            </aura:if>
+
+            <!-- Keyword Input Section -->
+            <lightning:layout pullToBoundary="small">
+                <aura:if isTrue="{!!empty(v.fieldNames)}">
+                    <lightning:layoutItem padding="around-small">
+                        <lightning:buttonIcon iconName="{!if(v.isConditionFolded, 'utility:jump_to_bottom', 'utility:jump_to_top')}" variant="border-filled" onclick="{!c.onFilterControlButtonClicked}" alternativeText="Show filtering options" />
+                    </lightning:layoutItem>
+                </aura:if>
+                <lightning:layoutItem padding="around-small" flexibility="auto, grow">
+                    <lightning:input label="dummy" class="is-labelHidden" type="search" variant="label-hidden" name="keyword" value="{!v.keyword}" />
+                </lightning:layoutItem>
+                <lightning:layoutItem padding="around-small">
+                    <lightning:button variant="brand" label="{!v.searchButtonLabel}" onclick="{!c.onSearch}" />
+                </lightning:layoutItem>
+            </lightning:layout>
+            <!-- /Keyword Input Section -->
+
+            <!-- Condition Input Section -->
+            <div class="{!'condition' + if(or(empty(v.fieldNames), and(!empty(v.fieldNames), v.isConditionFolded)), ' is-hidden', '')}">
+                <lightning:layout multipleRows="true" pullToBoundary="small">
+
+                    <!-- Group -->
+                    <aura:iteration items="{!v.groups}" var="group" indexVar="groupIndex">
+
+                        <!-- Section Header -->
+                        <aura:if isTrue="{!!empty(group.header)}">
+                            <lightning:layoutItem size="12" padding="around-small" >
+                                <div class="slds-form-element__legend slds-m-top_small">{!group.header.label}</div>
+                            </lightning:layoutItem>
+                        </aura:if>
+                        <!-- /Section Header -->
+
+                        <!-- Fields -->
+                        <aura:iteration items="{!group.fields}" var="field" indexVar="fieldIndex" >
+                            <aura:if isTrue="{!!empty(field)}">
+                                <lightning:layoutItem size="{!div(12, v.numColums)}" padding="horizontal-small" class="slds-m-bottom_small">
+                                    <aura:if isTrue="{!field.type=='STRING' || field.type=='EMAIL' || field.type=='URL' || field.type=='PHONE' || field.type=='ID' || field.type=='TEXTAREA'}">
+                                        <lightning:input type="text" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.value}" />
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='INTEGER' || field.type=='PERCENT' || field.type=='CURRENCY' || field.type=='DOUBLE'}">
+                                        <lightning:layout verticalAlign="end">
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="number" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.minValue}"  placeholder="min" step="{!field.step}"/>
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto,no-grow" class="spacer"/>
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="number" label="dummy" name="{!field.name}" value="{!field.maxValue}" placeholder="max" variant="label-hidden" step="{!field.step}"/>
+                                            </lightning:layoutItem>
+                                        </lightning:layout>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='PICKLIST'}">
+                                        <lightning:select name="{!field.name}" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" value="{!field.value}">
+                                            <option value="">-</option>
+                                            <aura:iteration items="{!field.options}" var="option">
+                                                <option value="{!option.value}" selected="{!option.isSelected}" text="{!option.label}"/>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='MULTIPICKLIST'}">
+                                        <c:MultiSelect id="{!field.path}" name="{!field.name}" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" options="{!field.options}" values="{!field.value}" placeholder=""/>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='BOOLEAN'}">
+                                        <lightning:input type="checkbox" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" checked="{!field.value}"/>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='DATE'}">
+                                        <lightning:layout verticalAlign="end">
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="date" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.minValue}" />
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto,no-grow" class="spacer"/>
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="date" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.maxValue}" variant="label-hidden" />
+                                            </lightning:layoutItem>
+                                        </lightning:layout>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='DATETIME'}">
+                                        <lightning:layout verticalAlign="end">
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="datetime-local" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.minValue}" />
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto,no-grow" class="spacer"/>
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="datetime-local" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.maxValue}" variant="label-hidden" />
+                                            </lightning:layoutItem>
+                                        </lightning:layout>
+                                    </aura:if>
+                                    <aura:if isTrue="{!field.type=='TIME'}">
+                                        <lightning:layout verticalAlign="end">
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="time" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.minValue}" />
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto,no-grow" class="spacer"/>
+                                            <lightning:layoutItem flexibility="auto,grow">
+                                                <lightning:input type="time" label="{!if(v.isFieldIndexDisplayed, field.index + '.', '') + field.label + if(v.isObjectNameDisplayed, ' - ' + field.objectLabel, '')}" name="{!field.name}" value="{!field.maxValue}" variant="label-hidden" />
+                                            </lightning:layoutItem>
+                                        </lightning:layout>
+                                    </aura:if>
+                                </lightning:layoutItem>
+                            </aura:if>
+                        </aura:iteration>
+                        <!-- /Fields -->
+
+                    </aura:iteration>
+                    <!-- /Group -->
+
+                </lightning:layout>
+            </div>
+
+        </lightning:card>
+        <!-- Condition Input Section -->
+
+        <lightning:spinner aura:id="spinner" class="slds-hide" variant="brand" size="large"/>
+    </div>
+</aura:component>

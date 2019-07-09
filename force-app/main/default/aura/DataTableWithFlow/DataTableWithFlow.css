@@ -1,0 +1,9 @@
+.THIS .slds-modal article {
+    background: white;
+    border-radius: 5px;
+    overflow: hidden;
+    padding: 16px;
+}
+.THIS .slds-card__body {
+    position: relative;
+}

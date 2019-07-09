@@ -1,0 +1,72 @@
+<aura:component access="global" implements="flexipage:availableForAllPageTypes,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:hasRecordId" controller="DataTableWithFlowController">
+    <!-- Global Attributes -->
+    <aura:attribute access="global" type="String" name="title" />
+    <aura:attribute access="global" type="String" name="flowNames" default="" />
+    <aura:attribute access="global" type="String" name="flowLabels" default="" />
+    <aura:attribute access="global" type="String" name="flowInput" default="" />
+    <aura:attribute access="global" type="String" name="order" />
+    <aura:attribute access="global" type="String" name="objectName" />
+    <aura:attribute access="global" type="String" name="fieldNames" default="" />
+
+    <aura:attribute access="global" type="Integer" name="height" default="500" />
+    <aura:attribute access="global" type="Integer" name="pageSize" default="50" />
+    <aura:attribute access="global" type="String" name="trueValue" default="true" />
+    <aura:attribute access="global" type="String" name="falseValue" default="false" />
+
+    <!-- Public Attributes -->
+    <aura:attribute access="public" type="String" name="recordId" default="" />
+    <aura:attribute access="public" type="String[]" name="recordIds" default="[]" />
+    <aura:attribute access="public" type="Aura.Component[]" name="modalBody" />
+    <aura:attribute access="public" type="String" name="errorMessage" default="" />
+
+    <!-- Private Attributes -->
+    <aura:attribute access="private" type="Object[]" name="flows" default="[]" />
+    <aura:attribute access="private" type="String" name="iconName" default="custom:custom57" />
+
+    <!-- Event Handler -->
+    <aura:handler event="c:SearchResult" action="{!c.onSearchResultEvent}" />
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+
+    <!-- User Interface -->
+    <div>
+        <lightning:card iconName="{!v.iconName}" title="{!v.title + ' (' + v.recordIds.length + ')'}">
+
+            <!-- Card Actions -->
+            <aura:set attribute="actions">
+                <aura:if isTrue="{!!empty(v.flows)}">
+                    <lightning:buttonMenu iconName="utility:flow" alternativeText="Flow" onselect="{!c.onFlowSelected}" menuAlignment="right">
+                        <aura:iteration items="{!v.flows}" var="flow">
+                            <lightning:menuItem label="{!flow.label}" value="{!flow.name}" />
+                        </aura:iteration>
+                    </lightning:buttonMenu>
+                </aura:if>
+            </aura:set>
+            <!-- /Card Actions -->
+
+            <aura:if isTrue="{!!empty(v.errorMessage)}">
+                <ui:message title="Error" severity="error" closable="false">{!v.errorMessage}</ui:message>
+            </aura:if>
+
+            <!-- Data Table -->
+            <c:DataTable aura:id="datatable" objectName="{!v.objectName}" fieldNames="{!v.fieldNames}" height="{!v.height}" pageSize="{!v.pageSize}" true="{!v.trueValue}" false="{!v.falseValue}" hideCheckboxColumn="{!empty(v.flows)}"></c:DataTable>
+            <!-- /Data Table  -->
+        </lightning:card>
+
+        <!-- Modal Section -->
+
+        <div class="{!if(empty(v.modalBody), 'slds-hide', '')}">
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header slds-modal__header_empty">
+                        <lightning:buttonIcon iconName="utility:close" alternativeText="Close" size="large" variant="bare-inverse" class="slds-modal__close" onclick="{!c.onFlowClosed}" />
+                    </header>
+                    {!v.modalBody}
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+
+        <!-- /Modal Section -->
+
+    </div>
+</aura:component>

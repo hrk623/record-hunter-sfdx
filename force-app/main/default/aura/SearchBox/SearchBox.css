@@ -1,0 +1,39 @@
+.THIS .slds-card__body {
+    padding: 0 1rem;
+}
+.THIS .spacer {
+    width: .5rem;
+}
+.THIS .condition {
+    opacity: 1;
+    animation-duration: .5s;
+    animation-name: fade-in;
+}
+.THIS .is-hidden{
+    display: none;
+}
+@keyframes fade-in {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+    1% {
+        display: block;
+        opacity: 0;
+    }
+    100% {
+        display: block;
+        opacity: 1;
+    }
+}
+.THIS .slds-form-element__label{
+    white-space: nowrap;
+    width: 0px;
+}
+.THIS .slds-form-element__group label {
+    display: none;
+}
+.THIS .slds-form-element__legend.slds-form-element__label {
+  font-weight: inherit;
+  float: inherit;
+ }

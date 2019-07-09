@@ -1,0 +1,13 @@
+<design:component label="Data Table with Flow">
+    <design:attribute name="title"      label="Title"           required="false" default="Result"      description="Title displayed on the component header. A number of records displayed follows."/>
+    <design:attribute name="objectName" label="Taget Object"    required="true"  default="Opportunity" description="API name for a target object. Add '__c' for a custom object. i.e. Account, Opportunity, CustomObject__c, etc"/>
+    <design:attribute name="fieldNames" label="Column Fields"   required="true"  default="Name, Type, StageName, Amount, CloseDate, AccountId.Name, OwnerId:User.Name" description="API names for fields on Target Object. Use ',' for multiple fields. Add '__c' for a custom fields. Use '.' to access its parent object's fields. Use ':' if polymorphic fields. i.e. Name, Amount, CloseDate, AccountId.Name, OwnerId:User.Name"/>
+    <design:attribute name="height"     label="Table Height"    required="true"  default="500"         description="Height of Data Table"/>
+    <design:attribute name="pageSize"   label="Page Size"       required="true"  default="50"          description="Number of Records for Each Load"/>
+    <design:attribute name="trueValue"  label="Label for True"  required="true"  default="true"        description="Label for chechbox value if 'true'"/>
+    <design:attribute name="falseValue" label="Label for False" required="true"  default="false"       description="Label for chechbox value if 'false'"/>
+    <design:attribute name="flowNames"  label="Flow Names"      required="false" default=""            description="API Name of Flows available for selected records. Flows require an input variable 'contextId' and a collection variable 'selectedIds'. Use ','' for multiple flows."/>
+    <design:attribute name="flowLabels" label="Flow Labels"     required="false" default=""            description="Labels for Flows to overwrite the Flows' API Names. Use ','' for multiple flows."/>
+    <design:attribute name="flowInput"  label="Flow Input"      required="true"  default="ID"          datasource="ID,RECORD" description="."/>
+    <design:attribute name="order"      label="Order"           required="true"  default="1"      datasource="1,2,3,4,5,6,7,8,9" description="Specifies the order of components to process the results. Typically, Searchbox is set to 1 and any other filter components follows consecutively. Do not skip any numbers."/>
+</design:component>

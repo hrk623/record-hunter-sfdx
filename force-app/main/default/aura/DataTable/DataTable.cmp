@@ -1,0 +1,62 @@
+<aura:component access="global" controller="DataTableController">
+
+    <!-- Global Attributes -->
+    <aura:attribute access="global" type="String"  name="objectName" />
+    <aura:attribute access="global" type="String"  name="fieldNames" default="" />
+    <aura:attribute access="global" type="Integer" name="height"     default="500" />
+    <aura:attribute access="global" type="Integer" name="pageSize"   default="50" />
+    <aura:attribute access="global" type="String"  name="true"       default="true" />
+    <aura:attribute access="global" type="String"  name="false"      default="false" />
+    <aura:attribute access="global" type="Boolean"  name="hideCheckboxColumn" default="true" />
+
+
+    <!-- Public Attributes -->
+    <aura:attribute access="public" type="String"   name="recordId"     default="" />
+    <aura:attribute access="global" type="String[]" name="recordIds" default="[]" />
+    <aura:attribute access="public" type="String"   name="errorMessage" default=""/>
+
+    <!-- Private Attributes -->
+    <aura:attribute access="private" type="Object[]" name="fields"              default="[]" />
+    <aura:attribute access="private" type="Object[]" name="columns"             default="[]" />
+    <aura:attribute access="private" type="Object[]" name="data"                default="[]" />
+    <aura:attribute access="private" type="String"   name="sortedDirection"     />
+    <aura:attribute access="private" type="String"   name="sortedBy"            />
+    <aura:attribute access="private" type="Integer"  name="offset"              default="0"/>
+    <aura:attribute access="private" type="String"   name="messageWhenNoResult" default="No Records Found"/>
+
+    <!-- Event Handler -->
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+
+    <!-- Component Method -->
+    <aura:method access="public" name="setRecordIds" action="{!c.onSetRecordIds}" >
+        <aura:attribute type="List" name="recordIds"  />
+    </aura:method >
+    <aura:method access="public" name="reload"         action="{!c.onReload}" ></aura:method >
+    <aura:method access="public" name="getSelectedIds" action="{!c.onGetSelectedIds}" ></aura:method >
+
+    <!-- User Interface -->
+    <div aura:id="component">
+            <aura:if isTrue="{!!empty(v.errorMessage)}">
+                <ui:message title="Error" severity="error" closable="false">{!v.errorMessage}</ui:message>
+            </aura:if>
+
+            <!-- Data Table -->
+            <div style="{!'height:' + v.height + 'px;'}">
+                <lightning:datatable aura:id="dataTable" data="{!v.data}" columns="{!v.columns}" keyField="{!v.objectName + '.Id'}" hideCheckboxColumn="{!v.hideCheckboxColumn}"
+                                     sortedBy="{!v.sortedBy}" sortedDirection="{!v.sortedDirection}" onsort="{!c.onSort}"
+                                     onrowaction="{!c.onRowAction}"
+                                     enableInfiniteLoading="true" onloadmore="{!c.onLoadMoreData}"
+                                     showRowNumberColumn="true" />
+            </div>
+            <!-- /Data Table  -->
+
+            <!-- Empty Message -->
+            <aura:if isTrue="{!and(empty(v.recordIds), !empty(v.messageWhenNoResult))}">
+                <div class="message" >
+                    <lightning:icon iconName="utility:warning" size="large" alternativeText="No Record Found"/>
+                    <div class="slds-text-body_regular  message-body">{!v.messageWhenNoResult}</div>
+                </div>
+            </aura:if>
+            <!-- /Empty Message -->
+    </div>
+</aura:component>

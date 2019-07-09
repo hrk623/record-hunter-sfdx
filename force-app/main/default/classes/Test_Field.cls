@@ -216,35 +216,6 @@ public class Test_Field {
         System.assertEquals('STRING', field.type);
     }
 
-
-    static testMethod void createSimpleField_EmptyPath() {
-        String exceptionName = '';
-        try {
-            Field field = new Field('');
-        } catch(Exception e) {
-            exceptionName = e.getTypeName();
-        }
-        System.assertEquals('Field.FieldException', exceptionName);
-    }
-    static testMethod void createSimpleField_InvalidObject() {
-        String exceptionName = '';
-        try {
-            Field field = new Field('ABC.Name');
-        } catch(Exception e) {
-            exceptionName = e.getTypeName();
-        }
-        System.assertEquals('Field.FieldException', exceptionName);
-    }
-    static testMethod void createSimpleField_InvalidFields() {
-        String exceptionName = '';
-        try {
-            Field field = new Field('Account.ABC');
-        } catch(Exception e) {
-            exceptionName = e.getTypeName();
-        }
-        System.assertEquals('Field.FieldException', exceptionName);
-    }
-
     static testMethod void checkCondition_SingleValue () {
         Field field = new Field('Account.Name');
         System.assertEquals(false, field.hasCondition());

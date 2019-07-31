@@ -1,4 +1,4 @@
-public class LocationFilterController {
+public with sharing class LocationFilterController {
     public class LocationFilterControllerException extends Exception {}
     public class Error {
         @AuraEnabled public String message;

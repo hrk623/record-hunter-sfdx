@@ -178,8 +178,8 @@
         const fields = c.get("v.fields").filter(function(field) {return field; });
         fields.forEach(function(field) {
             if (field.type === "DATETIME") {
-                if (field.minValue) field.minValue = moment(field.minValue).format("YYYY-MM-DDThh:mm:ssZ");
-                if (field.maxValue) field.maxValue = moment(field.maxValue).format("YYYY-MM-DDThh:mm:ssZ");
+                if (field.minValue) field.minValue = moment(field.minValue).format("YYYY-MM-DDTHH:mm:ssZ");
+                if (field.maxValue) field.maxValue = moment(field.maxValue).format("YYYY-MM-DDTHH:mm:ssZ");
             } else if (field.type === "TIME") {
                 if (field.minValue && !field.minValue.endsWith("Z")) field.minValue += "Z";
                 if (field.maxValue && !field.maxValue.endsWith("Z")) field.maxValue += "Z";

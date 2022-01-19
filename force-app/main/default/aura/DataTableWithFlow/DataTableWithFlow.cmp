@@ -60,7 +60,9 @@
                     <header class="slds-modal__header slds-modal__header_empty">
                         <lightning:buttonIcon iconName="utility:close" alternativeText="Close" size="large" variant="bare-inverse" class="slds-modal__close" onclick="{!c.onFlowClosed}" />
                     </header>
-                    {!v.modalBody}
+                    <div class="modal-body">
+                        {!v.modalBody}
+                    </div>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>

@@ -101,7 +101,7 @@
             });
             c.set("v.fields",fields);
 
-            return [fields, defaultValues];
+            return [JSON.parse(JSON.stringify(fields)), defaultValues];
         }))
         .then($A.getCallback(function([fields, defaultValues]) {
 

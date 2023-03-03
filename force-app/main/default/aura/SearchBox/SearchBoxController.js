@@ -101,7 +101,7 @@
             });
             c.set("v.fields",fields);
 
-            return [JSON.parse(JSON.stringify(fields)), defaultValues];
+            return [fields, defaultValues];
         }))
         .then($A.getCallback(function([fields, defaultValues]) {
 
@@ -147,13 +147,17 @@
             }
 
             const groups = [];
-            while (headers.length > 0 || fields.length > 0) {
+            let fieldIndex = 0;
+            while (headers.length > 0 || fields.length > fieldIndex) {
                 const group = {
                     header: headers.shift(),
                     fields: []
                 };
                 let count = c.get("v.numGroupItems");
-                while(count--) group.fields.push(fields.shift());
+                while(count--) {
+                    group.fields.push(fields.length > fieldIndex ? fields[fieldIndex] : null);
+                    fieldIndex++;
+                }
                 groups.push(group);
             }
             c.set("v.groups", groups);

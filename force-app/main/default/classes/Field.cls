@@ -100,7 +100,7 @@ public class Field {
                         ret = this.path + ' = \'' + this.value + '\'';
                     }
                 }
-            } when 'INTEGER', 'PERCENT', 'CURRENCY', 'DOUBLE' {
+            } when  'PERCENT', 'CURRENCY', 'DOUBLE' {
                 if (String.isNotBlank(this.minValue)){
                     ret = this.path + ' >= ' + (this.minValue.contains('.') ? this.minValue : this.minValue + '.0');
                 }
@@ -109,7 +109,7 @@ public class Field {
                     ret +=  this.path + ' <= ' + (this.maxValue.contains('.') ? this.maxValue : this.maxValue + '.0');
                 }
                 ret =  String.isNotBlank(this.minValue) && String.isNotBlank(this.maxValue) ? '(' + ret + ')' : ret;
-            } when 'DATETIME', 'DATE', 'TIME'  {
+            } when 'INTEGER', 'DATETIME', 'DATE', 'TIME'  {
                 ret =  String.isNotBlank(this.minValue) ? this.path + ' >= ' + this.minValue : '';
                 ret += String.isNotBlank(this.minValue) && String.isNotBlank(this.maxValue) ? ' AND ' : '';
                 ret += String.isNotBlank(this.maxValue) ? this.path + ' <= ' + this.maxValue : '';

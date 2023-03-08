@@ -102,6 +102,7 @@
             c.set("v.fields",fields);
 
             return [fields, defaultValues];
+            return [fields, defaultValues];
         }))
         .then($A.getCallback(function([fields, defaultValues]) {
 
@@ -147,7 +148,7 @@
             }
 
             const groups = [];
-            var fieldIndex = 0;
+            let fieldIndex = 0;
             while (headers.length > 0 || fields.length > fieldIndex) {
                 const group = {
                     header: headers.shift(),
@@ -155,7 +156,7 @@
                 };
                 let count = c.get("v.numGroupItems");
                 while(count--) {
-                    group.fields.push(fields.length > fieldIndex ? fields[fieldIndex]:null);
+                    group.fields.push(fields.length > fieldIndex ? fields[fieldIndex] : null);
                     fieldIndex++;
                 }
                 groups.push(group);

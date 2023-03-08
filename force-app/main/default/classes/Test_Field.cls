@@ -281,19 +281,19 @@ public class Test_Field {
         Field field = new Field('Account.NumberOfEmployees');
         field.minValue = '0';
         field.maxValue = '';
-        System.assertEquals('account.numberofemployees >= 0.0',  field.getWhereCondition());
+        System.assertEquals('account.numberofemployees >= 0',  field.getWhereCondition());
 
         field.minValue = '';
         field.maxValue = '10';
-        System.assertEquals('account.numberofemployees <= 10.0',  field.getWhereCondition());
+        System.assertEquals('account.numberofemployees <= 10',  field.getWhereCondition());
 
         field.minValue = '0';
         field.maxValue = '10';
-        System.assertEquals('(account.numberofemployees >= 0.0 AND account.numberofemployees <= 10.0)',  field.getWhereCondition());
+        System.assertEquals('(account.numberofemployees >= 0 AND account.numberofemployees <= 10)',  field.getWhereCondition());
 
-        field.minValue = '0.0';
-        field.maxValue = '10.0';
-        System.assertEquals('(account.numberofemployees >= 0.0 AND account.numberofemployees <= 10.0)',  field.getWhereCondition());
+        field.minValue = '0';
+        field.maxValue = '10';
+        System.assertEquals('(account.numberofemployees >= 0 AND account.numberofemployees <= 10)',  field.getWhereCondition());
     }
     static testMethod void createWhereCondition_ID () {
         Field field = new Field('Account.Id');

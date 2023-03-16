@@ -13,11 +13,7 @@ Record Hunter lets you to;
 
 ## Dev, Build and Test
 
-Simply install the unmanaged version from [here](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t2v000001ghvb)
 
-or
-
-git clone from this repository and deploy by yourself.
 
 ## Disclaimer
 This code is only a sample code and has not been fully tested. Please use this code at your own risks. This software is released under the MIT License, see LICENSE.txt.

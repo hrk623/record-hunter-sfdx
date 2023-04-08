@@ -1,0 +1,10 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test CLI Tools
+    runs-on: ubuntu-latest
+    steps:
+    - name: Greeting
+      run: echo Hello GitHub Actions!

@@ -8,3 +8,5 @@ jobs:
     steps:
     - name: Greeting
       run: echo Hello GitHub Actions!
+    - name: sfdx
+      run: npm install @salesforce/cli --global

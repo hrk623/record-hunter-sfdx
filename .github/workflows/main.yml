@@ -9,4 +9,10 @@ jobs:
     - name: Greeting
       run: echo Hello GitHub Actions!
     - name: sfdx
-      run: npm install @salesforce/cli --global
+      run: |
+        npm install @salesforce/cli --global
+        sf -h
+    - name: jq
+      run: jq --version
+        
+    
